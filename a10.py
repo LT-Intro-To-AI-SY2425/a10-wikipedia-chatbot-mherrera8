@@ -92,6 +92,34 @@ def get_polar_radius(planet_name: str) -> str:
 
     return match.group("radius")
 
+def get_gravity(planet_name: str) -> str:
+    """Gets the gravity of the given planet
+
+    Args: 
+        planet_name - name of the planet to get gravity of
+
+    Returns:
+        gravity of the given planet
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(planet_name)))
+    pattern = r"(?:Gravity.*?)(?: ?[\d]+ )?(?P<gravity>[\d,.]+)(?.[\d+])(?:.*?)m/s²"
+    error_text = "Page infobox has no gravity information"
+    match = get_match(infobox_text, pattern, error_text)
+
+def get_distance_from_sun(planet_name: str) -> str:
+    """Gets distance of planet from the sun
+
+    Args:
+        planet_name - nae of the planet to get distance
+
+    Returns:
+        distance of planet from the sun
+    """
+
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(planet_name)))
+    pattern = r"(?:Distance from Sun*?)(?: ?[\d]+ )?(?P<distance>[\d,.]+)(?:.*?)mi"
+    error_text = "Page infobox has no distance information"
+    match = get_match(infobox_text, pattern, error_text)
 
 def get_birth_date(name: str) -> str:
     """Gets birth date of the given person
@@ -111,6 +139,25 @@ def get_birth_date(name: str) -> str:
 
     return match.group("birth")
 
+def get_death_date(name: str) -> str:
+    """Gets the date of death of the given person
+    
+    Args:
+        name - name of the person
+        
+    Returns:
+        date of death of the given person
+    """
+
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(name)))
+    pattern = r"(?Died\D*)(?P<death>\d{4}-\d{2}-\d{2})"
+
+    error_text = (
+        "Page infobox has no death information (at least none in xxxx-xx-xx format)"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("death")
 
 # below are a set of actions. Each takes a list argument and returns a list of answers
 # according to the action and the argument. It is important that each function returns a
@@ -129,6 +176,17 @@ def birth_date(matches: List[str]) -> List[str]:
     return [get_birth_date(" ".join(matches))]
 
 
+def death_date(matches: List[str]) -> List[str]:
+    """Returns date of death of the named person in matches
+
+    Args:
+        matches - match from pattern of person's name to find date of death
+    
+    Returns: 
+        date of death of named person
+    """
+    return [get_death_date(" ".join(matches))]
+
 def polar_radius(matches: List[str]) -> List[str]:
     """Returns polar radius of planet in matches
 
@@ -140,6 +198,27 @@ def polar_radius(matches: List[str]) -> List[str]:
     """
     return [get_polar_radius(matches[0])]
 
+def gravity(mathces: List[str]) -> List[str]:
+    """Returns gravity of planety in matches
+
+    Args: 
+        matches - match from pattern of planet to find polar radius of
+
+    Returns:
+        gravity of planet
+    """
+    return [get_gravity(matches[0])]
+
+def distance_from_sun(matches: List[str]) -> List[str]:
+    """Returns distance from the sun of planet in matches
+
+    Args:
+        matches - match from pattern of planet to find distance of
+    
+    Returns:
+        distance from sun of planet
+    """
+    return [get_distance_from_sun(matches[0])]
 
 # dummy argument is ignored and doesn't matter
 def bye_action(dummy: List[str]) -> None:
